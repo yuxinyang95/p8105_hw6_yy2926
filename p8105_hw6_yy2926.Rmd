@@ -9,6 +9,7 @@ output: github_document
 library(tidyverse)
 library(viridis)
 library(modelr)
+library(purrr)
 ```
 
 # Problem 1
@@ -41,11 +42,40 @@ homicide_baltimore = homicide_data %>%
 fit_logistic = homicide_baltimore %>%
   glm(solved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
 
+
 fit_logistic %>% 
   broom::tidy() %>% 
   select(term, estimate, std.error) %>%
-  mutate(Term = recode(term, "victim_racenon-white" = "victim_race: non-white", "victim_sexMale" = "victim_sex: male"), "Odds Ratio" = exp(estimate), "Lower bound" = exp(estimate -1.96*std.error), "Upper bound" = exp(estimate +1.96*std.error)) %>%
+  mutate(Term = recode(term, "victim_racenon-white" = "victim_race: non-white", "victim_sexMale" = "victim_sex: male"), 
+         "Odds Ratio" = exp(estimate), 
+         "Lower bound" = exp(estimate -1.96*std.error), 
+         "Upper bound" = exp(estimate +1.96*std.error)) %>%
   select(Term, "Odds Ratio", "Lower bound", "Upper bound") %>%
   knitr::kable(digits = 3)
 ```
 
+## Part3: Fit the model for all cities
+```{r}
+
+### Write a function to fit the model 
+logistic_function = function(df){
+  glm_fit = glm(solved ~victim_age + victim_race + victim_sex, data =df, family = binomial())
+
+glm_fit %>%
+  broom::tidy() %>%
+  mutate(ors = exp(estimate),
+         conf_low = exp(estimate -1.96*std.error),
+         conf_high = exp(estimate -1.96*std.error))
+}
+  
+## Fit the model
+homicide_city = homicide_data %>%
+  group_by(city_state) %>%
+  nest()
+```
+nest() %>%
+  mutate(fit_log = map(data, logistic_function)) %>%
+  select(-data) %>%
+  unnest() %>%
+  filter(term == "victim_race_whitenonwhite") %>%
+  select(city_state, ors, conf_low, conf_high)
