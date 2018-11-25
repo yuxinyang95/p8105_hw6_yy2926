@@ -40,4 +40,12 @@ homicide_baltimore = homicide_data %>%
   filter(city_state == "Baltimore, MD")
 fit_logistic = homicide_baltimore %>%
   glm(solved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
+
+fit_logistic %>% 
+  broom::tidy() %>% 
+  select(term, estimate, std.error) %>%
+  mutate(Term = recode(term, "victim_racenon-white" = "victim_race: non-white", "victim_sexMale" = "victim_sex: male"), "Odds Ratio" = exp(estimate), "Lower bound" = exp(estimate -1.96*std.error), "Upper bound" = exp(estimate +1.96*std.error)) %>%
+  select(Term, "Odds Ratio", "Lower bound", "Upper bound") %>%
+  knitr::kable(digits = 3)
 ```
+
