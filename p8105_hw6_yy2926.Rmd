@@ -27,6 +27,7 @@ homicide_data = homicide_data %>%
   mutate(city_state = str_c(city, state, sep = ", " )) %>%
   filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL")))
 
+
 ### Modifiy variable race and age
 homicide_data = homicide_data %>%
   mutate(solved = as.numeric(disposition == "Closed by arrest"),
@@ -58,24 +59,24 @@ fit_logistic %>%
 ```{r}
 
 ### Write a function to fit the model 
-logistic_function = function(df){
-  glm_fit = glm(solved ~victim_age + victim_race + victim_sex, data =df, family = binomial())
-
-glm_fit %>%
-  broom::tidy() %>%
-  mutate(ors = exp(estimate),
-         conf_low = exp(estimate -1.96*std.error),
-         conf_high = exp(estimate -1.96*std.error))
+logistic_fit = function(df){
+ glm(solved ~victim_age + victim_race + victim_sex, data =df, family = binomial()) %>%
+ broom::tidy() %>%
+ mutate(ors = exp(estimate),
+        conf_low = exp(estimate -1.96*std.error),
+        conf_high = exp(estimate +1.96*std.error)) %>%
+    select(term, ors, conf_low, conf_high) %>%
+    filter(term == "victim_racenon-white")
 }
   
 ## Fit the model
 homicide_city = homicide_data %>%
+  select(city_state, solved, victim_sex, victim_race, victim_age) %>%
   group_by(city_state) %>%
-  nest()
-```
-nest() %>%
-  mutate(fit_log = map(data, logistic_function)) %>%
+  filter(victim_sex %in% c("Female", "Male", "Unknown")) %>% 
+  nest() %>%
+  mutate(log_models = map(data, logistic_fit)) %>%
   select(-data) %>%
-  unnest() %>%
-  filter(term == "victim_race_whitenonwhite") %>%
-  select(city_state, ors, conf_low, conf_high)
+  unnest()
+
+```
