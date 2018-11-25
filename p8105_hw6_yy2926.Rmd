@@ -1,0 +1,43 @@
+---
+title: "Homework6"
+author: "Yuxin"
+date: "2018.11.24"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(viridis)
+library(modelr)
+```
+
+# Problem 1
+
+## Part1: Read and clean data
+```{r}
+homicide_url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
+
+homicide_data = read.csv(url(homicide_url)) %>%
+  janitor::clean_names() %>%
+  as_tibble()
+
+### Create a new variable containes city and state
+homicide_data = homicide_data %>%
+  mutate(city_state = str_c(city, state, sep = ", " )) %>%
+  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL")))
+
+### Modifiy variable race and age
+homicide_data = homicide_data %>%
+  mutate(solved = as.numeric(disposition == "Closed by arrest"),
+         victim_race = ifelse(victim_race == "White", "white", "non-white"),
+         victim_race = fct_relevel(victim_race, ref = "white"),
+         victim_age = as.numeric(victim_age))
+```
+
+## Part2: Fit a model for Baltimore
+```{r}
+homicide_baltimore = homicide_data %>%
+  filter(city_state == "Baltimore, MD")
+fit_logistic = homicide_baltimore %>%
+  glm(solved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
+```
