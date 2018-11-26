@@ -97,7 +97,7 @@ This the plot that shows the odds ratio and 95% confidence interval of non-white
 
 # Problem 2
 
-## Read and clean data
+## Part1 Read and clean data
 ```{r}
 birthweight_data = read_csv(file = "./data/birthweight.csv") %>%
   janitor::clean_names() %>%
@@ -105,4 +105,19 @@ birthweight_data = read_csv(file = "./data/birthweight.csv") %>%
          frace = as.factor(frace),
          malform = as.factor(malform),
          mrace = as.factor(mrace))
+### Check for missing values
+colSums(is.na(birthweight_data))
 ```
+There is no missing data.
+
+## Part2 Propose a regression model for birthweight
+```{r}
+fit_null = lm(bwt ~ babysex + bhead + blength + delwt + gaweeks + wtgain, data = birthweight_data)
+birthweight_data %>%
+  add_predictions(fit_null) %>%
+  add_residuals (fit_null) %>%
+  ggplot(aes(x = pred, y = resid))+
+  geom_point(alpha = 0.2)
+```
+
+For the question, I choose a regression model based on a hypothesized structure for the factor.
