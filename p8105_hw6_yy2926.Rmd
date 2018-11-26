@@ -144,4 +144,14 @@ cv_birthweight = cv_birthweight %>%
          rmse_main = map2_dbl(fit_main, test, ~rmse(model = .x, data = .y)),
          rmse_int = map2_dbl(fit_int, test, ~rmse(model = .x, data = .y)))
 
+## Visualization
+cv_birthweight %>%
+  select(starts_with("rmse")) %>%
+  gather(key = model, value = rmse) %>%
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model),
+         model = recode(model, )) %>%
+  ggplot(aes(x = model, y = rmse, color = model)) +
+  geom_violin()
 ```
+
