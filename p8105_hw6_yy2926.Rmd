@@ -108,7 +108,7 @@ birthweight_data = read_csv(file = "./data/birthweight.csv") %>%
 ### Check for missing values
 colSums(is.na(birthweight_data))
 ```
-There is no missing data.
+We can see that there is no missing data.
 
 ## Part2 Propose a regression model for birthweight
 ```{r}
@@ -125,10 +125,23 @@ birthweight_data %>%
   )
 ```
 
-For the question, I choose a regression model based on a hypothesized structure for the factor. I choose six variables which may have direct relationship with the infant's birthweight. From the residual vs prediction plots, we can observed that most obsrevation are located in the lower right. 
+For the question, I choose a regression model based on a hypothesized structure for the factor. I choose six variables which may have direct relationship with the infant's birthweight. They are babysex, babyhead, baby's length, mother's weight at delivery, gestational age in weeks and mother's weight gain during pregnancy. From the residual vs prediction plots, we can observed that most obsrevation are located in the lower right. The residuals are roughly symmetrically distributed around zero. We may compare with other models to do further inference. 
 
 ## Part3 Compare with other models
 ```{r}
+## Two extrea models
 fit_main = lm(bwt ~ blength + gaweeks, data = birthweight_data)
 fit_int = lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (bhead * babysex) + (blength * babysex) +(bhead * babysex * blength), data = birthweight_data)
+
+## Compare two models
+cv_birthweight = crossv_mc(birthweight_data, 100)
+
+cv_birthweight = cv_birthweight %>%
+  mutate(fit_null = map(train, ~lm(bwt ~ babysex + bhead + blength + delwt + gaweeks + wtgain, data = birthweight_data)),
+         fit_main = map(train, ~lm(bwt ~ blength + gaweeks, data = birthweight_data)),
+         fit_int = map(train, ~lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (bhead * babysex) + (blength * babysex) +(bhead * babysex * blength), data = birthweight_data))) %>%
+  mutate(rmse_null = map2_dbl(fit_null, test, ~rmse(model = .x, data = .y)),
+         rmse_main = map2_dbl(fit_main, test, ~rmse(model = .x, data = .y)),
+         rmse_int = map2_dbl(fit_int, test, ~rmse(model = .x, data = .y)))
+
 ```
