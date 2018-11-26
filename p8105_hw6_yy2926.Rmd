@@ -7,7 +7,6 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(viridis)
 library(modelr)
 library(purrr)
 ```
@@ -78,5 +77,22 @@ homicide_city = homicide_data %>%
   mutate(log_models = map(data, logistic_fit)) %>%
   select(-data) %>%
   unnest()
-
 ```
+
+## Part4: Create a plot for each city
+```{r}
+homicide_city %>%
+  ggplot(aes(x = fct_reorder(city_state, ors), y = ors, color = city_state))+
+  geom_point(size = 2)+
+  geom_errorbar(aes(ymin = conf_low, ymax = conf_high, width = 0.2))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+        legend.position = "none")+
+  labs(title = "Estimated odds ratio of Non-white to White victims for solving homicidies among 50 large cities",
+       x = "City, State",
+       y = "Adjusted odds ratio")
+  
+```
+
+This the plot that shows the odds ratio and 95% confidence interval of non-white to white victims for solving homicides in 50 large U.S. cities. We can observe that Tampa have the highest odds ratios and Durham has the highest confidence bands. Futhermore, we can observe that there exist some 95 confidence interval such that upper bound is less than 1. We can conclude that for those cities, we are 95% confident that nonwhites have a lower proportion of unsolved homicides than whites. Also, there does not exist 95 confidence interval such that lower bound is biger than 1. We cannot conclude that nonwhites have a higher proortion of unsolved homicides than whites of all cities.
+
+
