@@ -117,7 +117,18 @@ birthweight_data %>%
   add_predictions(fit_null) %>%
   add_residuals (fit_null) %>%
   ggplot(aes(x = pred, y = resid))+
-  geom_point(alpha = 0.2)
+  geom_point(alpha = 0.2) +
+  labs( title = " Residuals vs. Predicted Values",
+          x = "Predicted Values",
+          y = "Residauls"
+    
+  )
 ```
 
-For the question, I choose a regression model based on a hypothesized structure for the factor.
+For the question, I choose a regression model based on a hypothesized structure for the factor. I choose six variables which may have direct relationship with the infant's birthweight. From the residual vs prediction plots, we can observed that most obsrevation are located in the lower right. 
+
+## Part3 Compare with other models
+```{r}
+fit_main = lm(bwt ~ blength + gaweeks, data = birthweight_data)
+fit_int = lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (bhead * babysex) + (blength * babysex) +(bhead * babysex * blength), data = birthweight_data)
+```
