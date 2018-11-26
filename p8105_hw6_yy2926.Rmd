@@ -149,9 +149,9 @@ cv_birthweight %>%
   select(starts_with("rmse")) %>%
   gather(key = model, value = rmse) %>%
   mutate(model = str_replace(model, "rmse_", ""),
-         model = fct_inorder(model),
-         model = recode(model, )) %>%
+         model = fct_inorder(model)) %>%
   ggplot(aes(x = model, y = rmse, color = model)) +
   geom_violin()
 ```
 
+Comparing all those three models, we can observe that my hypothesized model is the most fitted since it has smallest rmse value. The model with two predictors gestational age and length at birth fit the worst. The interaction model has a simillar result with mine. However since the intreaction between continous predictor is hard to interpret, my model with six main predictors is a better choice.
