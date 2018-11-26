@@ -95,4 +95,14 @@ homicide_city %>%
 
 This the plot that shows the odds ratio and 95% confidence interval of non-white to white victims for solving homicides in 50 large U.S. cities. We can observe that Tampa have the highest odds ratios and Durham has the highest confidence bands. Futhermore, we can observe that there exist some 95 confidence interval such that upper bound is less than 1. We can conclude that for those cities, we are 95% confident that nonwhites have a lower proportion of unsolved homicides than whites. Also, there does not exist 95 confidence interval such that lower bound is biger than 1. We cannot conclude that nonwhites have a higher proortion of unsolved homicides than whites of all cities.
 
+# Problem 2
 
+## Read and clean data
+```{r}
+birthweight_data = read_csv(file = "./data/birthweight.csv") %>%
+  janitor::clean_names() %>%
+  mutate(babysex = as.factor(babysex),
+         frace = as.factor(frace),
+         malform = as.factor(malform),
+         mrace = as.factor(mrace))
+```
